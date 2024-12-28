@@ -46,6 +46,10 @@ async def unsubscribe(message: types.Message):
     user_id = message.from_user.id
     db.remove_subscriber(user_id)
     await message.reply("Вы отписались от уведомлений.")
+    
+@dp.message_handler(commands=['test'])
+async def unsubscribe(message: types.Message):
+    await message.reply("работает")
 
 async def start_scheduler():
     scheduler = AsyncIOScheduler()
