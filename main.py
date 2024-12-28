@@ -53,7 +53,7 @@ async def unsubscribe(message: types.Message):
 
 async def start_scheduler():
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(notify_new_items, 'interval', seconds=15)  # Проверяем каждые 30 секунд
+    scheduler.add_job(notify_new_items, 'interval', seconds=60, misfire_grace_time=200)  # Проверяем каждые 30 секунд
     scheduler.start()
 
 async def main():
