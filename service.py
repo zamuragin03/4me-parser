@@ -2,10 +2,11 @@ import sqlite3
 from datetime import datetime
 
 class Database:
-    def __init__(self, db_name='items.db'):
+    def __init__(self, db_name='/app/db/items.db'):  # Указываем путь к директории с базой данных
         self.conn = sqlite3.connect(db_name)
         self.cursor = self.conn.cursor()
         self.create_tables()
+
 
     def create_tables(self):
         # Создание таблицы для сообщений

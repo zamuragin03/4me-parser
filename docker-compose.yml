@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  bot-4me-parsers:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: bot_parser
+    volumes:
+      - db_data:/app/db  # Монтируем директорию для базы данных
+
+volumes:
+  db_data:
