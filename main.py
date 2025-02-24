@@ -69,7 +69,16 @@ async def unsubscribe(message: types.Message):
 
 @dp.message_handler(commands=['test'])
 async def unsubscribe(message: types.Message):
-    await message.reply("работает")
+    moscow_tz = pytz.timezone('Europe/Moscow')
+    now = datetime.now(moscow_tz)
+    current_hour = now.hour
+
+    # Проверка, входит ли текущее время в рабочие часы
+    if 8 <= current_hour <= 18:
+        await message.reply("работает")
+    else:
+        await message.reply("бот спит")
+        
 
 async def start_scheduler():
     scheduler = AsyncIOScheduler()
