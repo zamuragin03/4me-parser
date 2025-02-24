@@ -1,3 +1,5 @@
 config.ini
 items.db
 creds.py
+venv
+*.pyc
