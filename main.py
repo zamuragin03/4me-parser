@@ -20,40 +20,32 @@ dp = Dispatcher(bot)
 
 # Инициализация парсера и базы данных
 url = 'https://sc-tech-solutions.itsm.mos.ru'
-params = {}  # Добавь параметры
-parser = ItemParser(url+'/inbox', params, cookies, headers)
+parser = ItemParser(url+'/inbox', {}, cookies, headers)
 db = Database('./db/items.db')
 
 # Функция для проверки новых элементов или изменения статусов
 async def notify_new_items():
-    # Получение текущего времени в МСК
-    moscow_tz = pytz.timezone('Europe/Moscow')
-    now = datetime.now(moscow_tz)
-    current_hour = now.hour
-
-    # Проверка, входит ли текущее время в рабочие часы
-    if 8 <= current_hour <= 18:
-        try:
-            new_items = parser.get_unread_items()
-        except LogoutException as e:
-            subscribers = db.get_subscribers()  # Получаем всех подписчиков
-            if subscribers:
+    try:
+        new_items = parser.get_unread_items()
+    except LogoutException as e:
+        subscribers = db.get_subscribers()  # Получаем всех подписчиков
+        if subscribers:
+            for user_id in subscribers:
+                try:
+                    await bot.send_message(chat_id=user_id, text=e, parse_mode=ParseMode.HTML)
+                except Exception as e:
+                    ...
+        return 
+    if new_items:
+        subscribers = db.get_subscribers()  # Получаем всех подписчиков
+        if subscribers:
+            for item in new_items:
+                message = f'Запрос обновлен или новый запрос: {item["subject"]}\nID: {item["id"]}\nЗапросил: {item["requester"]}\nСтатус: {item["status"]}\n\n <a href="{url+item["href"]}">Перейти</a>'
                 for user_id in subscribers:
                     try:
-                        await bot.send_message(chat_id=user_id, text=e, parse_mode=ParseMode.HTML)
+                        await bot.send_message(chat_id=user_id, text=message, parse_mode=ParseMode.HTML)
                     except Exception as e:
                         ...
-            return 
-        if new_items:
-            subscribers = db.get_subscribers()  # Получаем всех подписчиков
-            if subscribers:
-                for item in new_items:
-                    message = f'Запрос обновлен или новый запрос: {item["subject"]}\nID: {item["id"]}\nЗапросил: {item["requester"]}\nСтатус: {item["status"]}\n\n <a href="{url+item["href"]}">Перейти</a>'
-                    for user_id in subscribers:
-                        try:
-                            await bot.send_message(chat_id=user_id, text=message, parse_mode=ParseMode.HTML)
-                        except Exception as e:
-                            ...
 
 @dp.message_handler(commands=['subscribe'])
 async def subscribe(message: types.Message):
@@ -69,15 +61,7 @@ async def unsubscribe(message: types.Message):
 
 @dp.message_handler(commands=['test'])
 async def unsubscribe(message: types.Message):
-    moscow_tz = pytz.timezone('Europe/Moscow')
-    now = datetime.now(moscow_tz)
-    current_hour = now.hour
-
-    # Проверка, входит ли текущее время в рабочие часы
-    if 8 <= current_hour <= 18:
-        await message.reply("работает")
-    else:
-        await message.reply("бот спит")
+    await message.reply("работает")
         
 
 async def start_scheduler():
